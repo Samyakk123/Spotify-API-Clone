@@ -82,7 +82,20 @@ public class SongController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("POST %s", Utils.getUrl(request)));
 
-		return null;
+		String songName = params.get("songName");
+		String songArtistFullName = params.get("songArtistFullName");
+		String songAlbum = params.get("songAlbum");
+		
+		if(songName != null && songArtistFullName != null && songAlbum != null) {
+		  Song song = new Song(songName, songArtistFullName, songAlbum);
+		  DbQueryStatus status = songDal.addSong(song);
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		}
+		else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		
+		return response;
 	}
 
 	
