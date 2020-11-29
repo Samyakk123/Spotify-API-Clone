@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 
 @Repository
 public class SongDalImpl implements SongDal {
@@ -42,7 +44,17 @@ public class SongDalImpl implements SongDal {
 	@Override
 	public DbQueryStatus findSongById(String songId) {
 		// TODO Auto-generated method stub
-		return null;
+		toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+		
+		try {
+		  Song temp = db.findById(songId, Song.class, "songs");
+		  toReturn.setData(temp);
+		  return toReturn;
+		  
+		}catch(Exception e) {
+		  toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+		  return toReturn;
+		}
 	}
 
 	@Override
@@ -59,7 +71,44 @@ public class SongDalImpl implements SongDal {
 
 	@Override
 	public DbQueryStatus updateSongFavouritesCount(String songId, boolean shouldDecrement) {
-		// TODO Auto-generated method stub
-		return null;
+
+	  toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+	  
+	  DbQueryStatus status = this.findSongById(songId);
+	  Song returnVal = (Song) status.getData();
+
+	  
+	  long currentVal = returnVal.getSongAmountFavourites();
+	  long increment = 0;
+	  if(shouldDecrement) {
+	    increment = -1;
+	  }
+	  else {
+	    increment = 1;
+	  }
+	  returnVal.setSongAmountFavourites(currentVal + increment);
+
+	  try {
+	    
+	    db.getCollection("songs").updateOne(Filters.eq("_id", new ObjectId(songId)), Updates.set("songAmountFavourites", currentVal+increment));
+	    toReturn.setData(returnVal);
+	    toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_OK);
+	  }
+	  catch(Exception e) {
+        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+	  }
+	  
+	  return toReturn;
+	  
+	  
+//      DbQueryStatus status = songDal.findSongById(songId);
+//      Song returnVal = (Song) status.getData();
+//      
+//      long currentVal = returnVal.getSongAmountFavourites();
+//      
+//      long increment = Integer.parseInt(shouldDecrement);
+//
+//      returnVal.setSongAmountFavourites(currentVal + increment);
+      
 	}
 }
