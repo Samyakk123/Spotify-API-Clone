@@ -91,8 +91,8 @@ public class SongDalImpl implements SongDal {
       try {
         
         // FIX INVALID INPUT CHECK HERE :( DON'T RMMR HOW DIVYAM DID IT and too sleepy
-        
-        db.getCollection("songs").updateOne(Filters.eq("_id", new ObjectId(songId)), Updates.set("songAmountFavourites", currentVal+increment));
+        ObjectId temp = new ObjectId(songId);
+        db.getCollection("songs").updateOne(Filters.eq("_id", temp), Updates.set("songAmountFavourites", currentVal+increment));
         toReturn.setData(returnVal);
         toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_OK);
       }
