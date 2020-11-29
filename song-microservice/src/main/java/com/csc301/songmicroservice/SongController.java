@@ -48,6 +48,7 @@ public class SongController {
 
 		if(songId != null) {
 		  try { 
+		    //to check if the id is a valid id format 
 	        ObjectId temp = new ObjectId(songId);
 	        DbQueryStatus status = songDal.findSongById(songId);
 	        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
@@ -73,6 +74,7 @@ public class SongController {
         
         if(songId != null) {
           try { 
+            //to check if the id is a valid id format
             ObjectId temp = new ObjectId(songId);
             DbQueryStatus status = songDal.getSongTitleById(songId);
             Utils.setResponseStatus(response, status.getdbQueryExecResult(), ((Song) status.getData()).getSongName());
