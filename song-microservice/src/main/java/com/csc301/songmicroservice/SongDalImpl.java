@@ -43,25 +43,35 @@ public class SongDalImpl implements SongDal {
 
     @Override
     public DbQueryStatus findSongById(String songId) {
-        // TODO Auto-generated method stub
-        toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-        
-        try {
-          Song temp = db.findById(songId, Song.class, "songs");
-          toReturn.setData(temp);
-          return toReturn;
-          
-        }catch(Exception e) {
-          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
-          return toReturn;
+      toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      try {
+        Song found = db.findById(songId, Song.class);
+        if(found == null) { 
+          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND); 
         }
+        toReturn.setData(found);
+        return toReturn;
+      }catch(Exception e) {
+        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+        return toReturn;
+      }
     }
-    // small change
 
     @Override
     public DbQueryStatus getSongTitleById(String songId) {
         // TODO Auto-generated method stub
-        return null;
+      toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      try {
+        Song found = db.findById(songId, Song.class);
+        if(found == null) { 
+          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND); 
+        }
+        toReturn.setData(found);
+        return toReturn;
+      }catch(Exception e) {
+        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+        return toReturn;
+      }
     }
 
     @Override
