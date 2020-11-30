@@ -27,50 +27,49 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/")
 public class SongController {
 
-	@Autowired
-	private final SongDal songDal;
+    @Autowired
+    private final SongDal songDal;
 
-	private OkHttpClient client = new OkHttpClient();
+    private OkHttpClient client = new OkHttpClient();
 
-	
-	public SongController(SongDal songDal) {
-		this.songDal = songDal;
-	}
+    
+    public SongController(SongDal songDal) {
+        this.songDal = songDal;
+    }
 
-	
-	@RequestMapping(value = "/getSongById/{songId}", method = RequestMethod.GET)
-	public @ResponseBody Map<String, Object> getSongById(@PathVariable("songId") String songId,
-			HttpServletRequest request) {
-	  
-	  //guessing the implementation for this since not in handout 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("GET %s", Utils.getUrl(request)));
+    @RequestMapping(value = "/getSongById/{songId}", method = RequestMethod.GET)
+    public @ResponseBody Map<String, Object> getSongById(@PathVariable("songId") String songId,
+            HttpServletRequest request) {
+      
+      //guessing the implementation for this since not in handout 
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("path", String.format("GET %s", Utils.getUrl(request)));
 
-		if(songId != null) {
-		  try { 
-		    //to check if the id is a valid id format 
-	        ObjectId temp = new ObjectId(songId);
-	        DbQueryStatus status = songDal.findSongById(songId);
-	        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
-	      }
-	      catch(Exception e) { 
-	        Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
-	      }
+        if(songId != null) {
+          try { 
+            //to check if the id is a valid id format 
+            ObjectId temp = new ObjectId(songId);
+            DbQueryStatus status = songDal.findSongById(songId);
+            Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+          }
+          catch(Exception e) { 
+            Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+          }
         }
         else {
           Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
         }
         
         return response;
-	}
+    }
 
-	
-	@RequestMapping(value = "/getSongTitleById/{songId}", method = RequestMethod.GET)
-	public @ResponseBody Map<String, Object> getSongTitleById(@PathVariable("songId") String songId,
-			HttpServletRequest request) {
+    
+    @RequestMapping(value = "/getSongTitleById/{songId}", method = RequestMethod.GET)
+    public @ResponseBody Map<String, Object> getSongTitleById(@PathVariable("songId") String songId,
+            HttpServletRequest request) {
 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("GET %s", Utils.getUrl(request)));
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("path", String.format("GET %s", Utils.getUrl(request)));
         
         if(songId != null) {
           try { 
@@ -88,51 +87,62 @@ public class SongController {
         }
         
         return response;
-	}
+    }
 
-	
-	@RequestMapping(value = "/deleteSongById/{songId}", method = RequestMethod.DELETE)
-	public @ResponseBody Map<String, Object> deleteSongById(@PathVariable("songId") String songId,
-			HttpServletRequest request) {
+    
+    @RequestMapping(value = "/deleteSongById/{songId}", method = RequestMethod.DELETE)
+    public @ResponseBody Map<String, Object> deleteSongById(@PathVariable("songId") String songId,
+            HttpServletRequest request) {
 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("DELETE %s", Utils.getUrl(request)));
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("path", String.format("DELETE %s", Utils.getUrl(request)));
 
-		return null;
-	}
+        DbQueryStatus status = songDal.deleteSongById(songId);
+        
+        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        
+        return response;        
+    }
 
-	
-	@RequestMapping(value = "/addSong", method = RequestMethod.POST)
-	public @ResponseBody Map<String, Object> addSong(@RequestParam Map<String, String> params,
-			HttpServletRequest request) {
+    
+    @RequestMapping(value = "/addSong", method = RequestMethod.POST)
+    public @ResponseBody Map<String, Object> addSong(@RequestParam Map<String, String> params,
+            HttpServletRequest request) {
 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("POST %s", Utils.getUrl(request)));
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("path", String.format("POST %s", Utils.getUrl(request)));
 
-		String songName = params.get("songName");
-		String songArtistFullName = params.get("songArtistFullName");
-		String songAlbum = params.get("songAlbum");
-		
-		if(songName != null && songArtistFullName != null && songAlbum != null) {
-		  Song song = new Song(songName, songArtistFullName, songAlbum);
-		  DbQueryStatus status = songDal.addSong(song);
-		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
-		}
-		else {
-		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
-		}
-		
-		return response;
-	}
+        String songName = params.get("songName");
+        String songArtistFullName = params.get("songArtistFullName");
+        String songAlbum = params.get("songAlbum");
+        
+        if(songName != null && songArtistFullName != null && songAlbum != null) {
+          Song song = new Song(songName, songArtistFullName, songAlbum);
+          DbQueryStatus status = songDal.addSong(song);
+          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        }
+        else {
+          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+        }
+        
+        return response;
+    }
 
-	
-	@RequestMapping(value = "/updateSongFavouritesCount/{songId}", method = RequestMethod.PUT)
-	public @ResponseBody Map<String, Object> updateFavouritesCount(@PathVariable("songId") String songId,
-			@RequestParam("shouldDecrement") String shouldDecrement, HttpServletRequest request) {
+    
+    @RequestMapping(value = "/updateSongFavouritesCount/{songId}", method = RequestMethod.PUT)
+    public @ResponseBody Map<String, Object> updateFavouritesCount(@PathVariable("songId") String songId,
+            @RequestParam("shouldDecrement") String shouldDecrement, HttpServletRequest request) {
 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("data", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
-	}
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("data", String.format("PUT %s", Utils.getUrl(request)));
+        
+        boolean updateDecrement = Boolean.parseBoolean(shouldDecrement);
+        
+        DbQueryStatus status = songDal.updateSongFavouritesCount(songId, updateDecrement);
+        
+        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        
+        return response;
+    
+    }
 }
