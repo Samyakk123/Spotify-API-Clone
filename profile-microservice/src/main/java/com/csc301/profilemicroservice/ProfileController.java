@@ -52,8 +52,21 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("POST %s", Utils.getUrl(request)));
+		
+		String userName = params.get("userName");
+        String fullName = params.get("fullName");
+        String password = params.get("password");
+        
+        if(userName != null && fullName != null && password != null) {
 
-		return null;
+          DbQueryStatus status = profileDriver.createUserProfile(userName, fullName, password); 
+          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        }
+        else {
+          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+        }
+        
+        return response;
 	}
 
 	@RequestMapping(value = "/followFriend/{userName}/{friendUserName}", method = RequestMethod.PUT)
@@ -63,7 +76,14 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		
-		return null;
+		if(friendUserName != null && userName!=null) {
+		  DbQueryStatus status = profileDriver.followFriend(userName, friendUserName);
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		}
+		else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		return response;
 	}
 
 	@RequestMapping(value = "/getAllFriendFavouriteSongTitles/{userName}", method = RequestMethod.GET)
@@ -83,8 +103,15 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+		
+	      if(friendUserName != null && userName!=null) {
+	          DbQueryStatus status = profileDriver.unfollowFriend(userName, friendUserName);
+	          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+	        }
+	        else {
+	          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+	        }
+	        return response;
 	}
 
 	@RequestMapping(value = "/likeSong/{userName}/{songId}", method = RequestMethod.PUT)
@@ -93,8 +120,14 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+		if(userName != null && songId != null) {
+		  DbQueryStatus status = playlistDriver.likeSong(userName, songId);
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		}
+		else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		return response;
 	}
 
 	@RequestMapping(value = "/unlikeSong/{userName}/{songId}", method = RequestMethod.PUT)
