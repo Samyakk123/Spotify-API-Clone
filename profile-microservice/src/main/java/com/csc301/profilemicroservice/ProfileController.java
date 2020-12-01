@@ -65,7 +65,7 @@ public class ProfileController {
         else {
           Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
         }
-        
+       
         return response;
 	}
 
