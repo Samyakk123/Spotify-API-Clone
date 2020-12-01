@@ -60,6 +60,7 @@ public class ProfileDriverImpl implements ProfileDriver {
     	     trans.run("MERGE (a:playlist {plName:$plName})", toInsertTwo); 
     	     trans.run("MATCH (a:profile {userName: $userName}), (b:playlist {plName:$plName}) \n MERGE (a)-[r:created]->(b)", toInsertThree); 
     	     trans.success();
+    	     
 	    }
         session.close();
         return toReturn; 
