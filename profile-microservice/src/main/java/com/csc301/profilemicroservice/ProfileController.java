@@ -76,7 +76,14 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		
-		return null;
+		if(friendUserName != null && userName!=null) {
+		  DbQueryStatus status = profileDriver.followFriend(userName, friendUserName);
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		}
+		else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		return response;
 	}
 
 	@RequestMapping(value = "/getAllFriendFavouriteSongTitles/{userName}", method = RequestMethod.GET)
@@ -96,8 +103,15 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+		
+	      if(friendUserName != null && userName!=null) {
+	          DbQueryStatus status = profileDriver.unfollowFriend(userName, friendUserName);
+	          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+	        }
+	        else {
+	          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+	        }
+	        return response;
 	}
 
 	@RequestMapping(value = "/likeSong/{userName}/{songId}", method = RequestMethod.PUT)

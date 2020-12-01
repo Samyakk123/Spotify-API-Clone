@@ -68,13 +68,49 @@ public class ProfileDriverImpl implements ProfileDriver {
 	@Override
 	public DbQueryStatus followFriend(String userName, String frndUserName) {
 		
-		return null;
+	  toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+	  try (Session session = ProfileMicroserviceApplication.driver.session()){
+	    try( Transaction trans = session.beginTransaction()){
+	      Map<String, Object> toInsert = new HashMap<String, Object>();
+	      toInsert.put("userName", userName);
+	      toInsert.put("frndUserName", frndUserName);
+	      trans.run("MATCH (a:profile {userName:$userName}), (b:profile {userName:$frndUserName})\n" + "CREATE (a)-[r:FRIENDS]->(b)\n" + "RETURN type(r)", toInsert);
+	      trans.success();
+	    }
+	    session.close();
+	    return toReturn;
+	  }catch(Exception e) {
+	    toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+	    return toReturn;
+	  }
+	  
+	  
+		
 	}
 
 	@Override
 	public DbQueryStatus unfollowFriend(String userName, String frndUserName) {
-		
-		return null;
+	  
+      toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      try (Session session = ProfileMicroserviceApplication.driver.session()){
+        try( Transaction trans = session.beginTransaction()){
+          Map<String, Object> toInsert = new HashMap<String, Object>();
+          toInsert.put("userName", userName);
+          toInsert.put("frndUserName", frndUserName);
+          trans.run("MATCH (a:profile {userName:$userName})-[r:FRIENDS]->(b:profile {userName:$frndUserName})\n" + "DELETE r" , toInsert);
+          trans.success();
+          
+//          MATCH (a:profile {userName: "awesome"})-[r:FRIENDS]->(b:profile {userName: "anotherName"})
+//          DELETE r
+          
+          
+        }
+        session.close();
+        return toReturn;
+      }catch(Exception e) {
+        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+        return toReturn;
+      }
 	}
 
 	@Override
