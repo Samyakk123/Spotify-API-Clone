@@ -1,6 +1,5 @@
 package com.csc301.songmicroservice;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,27 +40,16 @@ public class SongController {
 	@RequestMapping(value = "/getSongById/{songId}", method = RequestMethod.GET)
 	public @ResponseBody Map<String, Object> getSongById(@PathVariable("songId") String songId,
 			HttpServletRequest request) {
-	  
-	  //guessing the implementation for this since not in handout 
+
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("GET %s", Utils.getUrl(request)));
 
-		if(songId != null) {
-		  try { 
-		    //to check if the id is a valid id format 
-	        ObjectId temp = new ObjectId(songId);
-	        DbQueryStatus status = songDal.findSongById(songId);
-	        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
-	      }
-	      catch(Exception e) { 
-	        Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
-	      }
-        }
-        else {
-          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
-        }
-        
-        return response;
+		DbQueryStatus dbQueryStatus = songDal.findSongById(songId);
+
+		response.put("message", dbQueryStatus.getMessage());
+		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+
+		return response;
 	}
 
 	
@@ -71,23 +59,8 @@ public class SongController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("GET %s", Utils.getUrl(request)));
-        
-        if(songId != null) {
-          try { 
-            //to check if the id is a valid id format
-            ObjectId temp = new ObjectId(songId);
-            DbQueryStatus status = songDal.getSongTitleById(songId);
-            Utils.setResponseStatus(response, status.getdbQueryExecResult(), ((Song) status.getData()).getSongName());
-          }
-          catch(Exception e){ 
-            Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
-          }
-        }
-        else {
-          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
-        }
-        
-        return response;
+
+		return null;
 	}
 
 	
@@ -109,20 +82,7 @@ public class SongController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("POST %s", Utils.getUrl(request)));
 
-		String songName = params.get("songName");
-		String songArtistFullName = params.get("songArtistFullName");
-		String songAlbum = params.get("songAlbum");
-		
-		if(songName != null && songArtistFullName != null && songAlbum != null) {
-		  Song song = new Song(songName, songArtistFullName, songAlbum);
-		  DbQueryStatus status = songDal.addSong(song);
-		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
-		}
-		else {
-		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
-		}
-		
-		return response;
+		return null;
 	}
 
 	
