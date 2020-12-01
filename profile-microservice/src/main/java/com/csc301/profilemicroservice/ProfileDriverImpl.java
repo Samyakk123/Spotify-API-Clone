@@ -47,12 +47,18 @@ public class ProfileDriverImpl implements ProfileDriver {
 	  
 	  try (Session session = ProfileMicroserviceApplication.driver.session()) {
 	    try (Transaction trans = session.beginTransaction()) {
-	      System.out.println("hi"); 
     	     Map<String, Object> toInsert = new HashMap<String, Object>(); 
+    	     Map<String, Object>  toInsertTwo = new HashMap<String, Object>(); 
+    	     Map<String, Object>  toInsertThree = new HashMap<String, Object>(); 
     	     toInsert.put("userName", userName); 
     	     toInsert.put("fullName", fullName); 
     	     toInsert.put("password", password); 
-    	     trans.run("MERGE (a:profile {userName:$userName, fullName: $fullName, password: $password})", toInsert);
+    	     toInsertTwo.put("plName", userName + "-favorites"); 
+    	     toInsertThree.put("userName", userName); 
+    	     toInsertThree.put("plName", userName + "-favorites"); 
+    	     trans.run("MERGE (a:profile {userName: $userName, fullName: $fullName, password: $password})", toInsert);
+    	     trans.run("MERGE (a:playlist {plName:$plName})", toInsertTwo); 
+    	     trans.run("MATCH (a:profile {userName: $userName}), (b:playlist {plName:$plName}) \n MERGE (a)-[r:created]->(b)", toInsertThree); 
     	     trans.success();
 	    }
         session.close();
