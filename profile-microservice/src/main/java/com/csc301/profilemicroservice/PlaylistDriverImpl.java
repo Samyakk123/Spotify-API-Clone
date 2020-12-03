@@ -140,30 +140,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	public DbQueryStatus unlikeSong(String userName, String songId) {
 		toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
 		
-		ObjectMapper mapper = new ObjectMapper();
-		HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost:3001" + "/updateSongFavouritesCount/" + songId + "/?shouldDecrement=true").newBuilder();
-		
-		urlBuilder.addQueryParameter("songId", songId);
-		
-		String url = urlBuilder.build().toString();
-		RequestBody body = RequestBody.create(null, new byte[0]);
-		
-		Request request = new Request.Builder().url(url).method("PUT", body).build();
-		
-		Call call = client.newCall(request);
-		
-		Response responseFromAddMs = null;
-		String addServiceBody = "{}";
-		
-		try {
-		  responseFromAddMs = call.execute();
-		  addServiceBody = responseFromAddMs.body().string();
-		  System.out.println("here: " + addServiceBody);
-		}catch(Exception e) {
-		  toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
-		  return toReturn;
-		}
-		
+
 		
 		try(Session session = ProfileMicroserviceApplication.driver.session()){
 		  try(Transaction trans = session.beginTransaction()){
@@ -177,8 +154,35 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		        + "DELETE r", toRemove);
 		    trans.run("MATCH (a:song {id:$id})\n"
 		        + "DELETE a", toRemove2);
+		    
 		    trans.success();
-//		    trans.run("");
+
+		    
+		    // Subtract by one in favourites of the song
+	        ObjectMapper mapper = new ObjectMapper();
+	        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost:3001" + "/updateSongFavouritesCount/" + songId + "/?shouldDecrement=true").newBuilder();
+	        
+	        urlBuilder.addQueryParameter("songId", songId);
+	        
+	        String url = urlBuilder.build().toString();
+	        RequestBody body = RequestBody.create(null, new byte[0]);
+	        
+	        Request request = new Request.Builder().url(url).method("PUT", body).build();
+	        
+	        Call call = client.newCall(request);
+	        
+	        Response responseFromAddMs = null;
+	        String addServiceBody = "{}";
+	        
+	        try {
+	          responseFromAddMs = call.execute();
+	          addServiceBody = responseFromAddMs.body().string();
+	          System.out.println("here: " + addServiceBody);
+	        }catch(Exception e) {
+	          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+	          return toReturn;
+	        }
+	        
 		    
 
 		  }
