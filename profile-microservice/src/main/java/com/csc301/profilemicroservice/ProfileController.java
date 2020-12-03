@@ -90,10 +90,19 @@ public class ProfileController {
 	public @ResponseBody Map<String, Object> getAllFriendFavouriteSongTitles(@PathVariable("userName") String userName,
 			HttpServletRequest request) {
 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+	  Map<String, Object> response = new HashMap<String, Object>();
+      response.put("path", String.format("GET %s", Utils.getUrl(request)));
+      
+      if(userName != null) {
 
-		return null;
+        DbQueryStatus status = profileDriver.getAllSongFriendsLike(userName); 
+        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+      }
+      else {
+        Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+      }
+     
+      return response;
 	}
 
 

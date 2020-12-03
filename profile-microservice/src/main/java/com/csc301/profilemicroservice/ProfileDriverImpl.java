@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.json.JSONObject;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
@@ -122,7 +122,43 @@ public class ProfileDriverImpl implements ProfileDriver {
 
 	@Override
 	public DbQueryStatus getAllSongFriendsLike(String userName) {
-			
-		return null;
+	  toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      try (Session session = ProfileMicroserviceApplication.driver.session()){
+        try( Transaction trans = session.beginTransaction()){
+          Map<String, Object> toInsert = new HashMap<String, Object>();
+          JSONObject data = new JSONObject(); 
+          
+          toInsert.put("userName", userName);
+          StatementResult responseOne = trans.run("MATCH (a:profile {userName:$userName})-[r:FRIENDS]->(b:profile) \n RETURN b.userName", toInsert);
+          List<Record> records = responseOne.list();      
+          for(int i = 0; i < records.size(); i++) {
+            //assuming userName cannot be duplicate !!! 
+            ArrayList<String> temp = new ArrayList<String>(); 
+            Map<String, Object> toInsertTwo = new HashMap<String, Object>();
+            Value friend = records.get(i).get("b.userName");
+            String friendTemp = friend.toString().substring(1, friend.toString().length() - 1); 
+            toInsertTwo.put("friend", friendTemp); 
+            toInsertTwo.put("plName", friendTemp + "-favorites"); 
+            StatementResult responseTwo = trans.run("MATCH (a:profile {userName:$friend})-[r:created]->(b:playlist {plName:$plName})"
+                + "MATCH (b:playlist)-[d:favorites]->(c:song) \n "
+                + "RETURN c.title", toInsertTwo);
+            List<Record> recordsTwo = responseTwo.list(); 
+            for(int j = 0; j < recordsTwo.size(); j++) { 
+              Value songTitle = recordsTwo.get(j).get("c.title"); 
+              System.out.println(songTitle); 
+              temp.add(songTitle.toString().substring(1, songTitle.toString().length() - 1));
+            }
+            data.put(friendTemp, temp);
+            
+          }
+          toReturn.setData(data.toString());
+          trans.success();
+        }
+        session.close();
+        return toReturn;
+      }catch(Exception e) {
+        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+        return toReturn;
+      }
 	}
 }
