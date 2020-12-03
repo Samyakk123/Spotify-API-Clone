@@ -91,9 +91,10 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	             toInsert.put("userName", userName);
 	             toInsert.put("plName", userName + "-favorites");
 	             toInsert.put("song", song);
+	             toInsert.put("id", songId);
 	             
 	             trans.run("\n MATCH (a:profile {userName:$userName})-[r:created]->(b:playlist {plName:$plName})\n"
-	                 + " MERGE (b)-[d:favorites]-(c:song {title:$song})", toInsert);
+	                 + " MERGE (b)-[d:favorites]-(c:song {title:$song, id: $id})", toInsert);
 	             trans.success();
 	             
 //	             MATCH (a:profile {userName: "test"})-[r:created]->(b:playlist {plName:"test-favorites"})
@@ -103,6 +104,8 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	        session.close();
 	        return toReturn; 
 	        
+	      }catch(Exception e) {
+	        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	      }    
 
 	    
@@ -113,7 +116,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	    
 	    
 	  }catch(Exception e) {
-	    System.out.println("error: " + e);
 	    toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	  }
 	  
@@ -125,8 +127,36 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 
 	@Override
 	public DbQueryStatus unlikeSong(String userName, String songId) {
+		toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
 		
-		return null;
+		try(Session session = ProfileMicroserviceApplication.driver.session()){
+		  try(Transaction trans = session.beginTransaction()){
+		    Map<String, Object> toRemove = new HashMap<String, Object>();
+		    Map<String, Object> toRemove2 = new HashMap<String, Object>();
+		    toRemove.put("plName", userName + "-favorites");
+		    toRemove.put("songId", songId);
+		    toRemove2.put("id", songId);
+		    
+		    trans.run("MATCH (a:playlist {plName:$plName})-[r:favorites]->(b:song {id:$songId})\n"
+		        + "DELETE r", toRemove);
+		    trans.run("MATCH (a:song {id:$id})\n"
+		        + "DELETE a", toRemove2);
+		    trans.success();
+//		    trans.run("");
+		    
+
+		  }
+		  session.close();
+		  
+		}catch(Exception e) {
+		  toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+		  
+		}
+		
+		
+		return toReturn;
+		
+
 	}
 
 	@Override
