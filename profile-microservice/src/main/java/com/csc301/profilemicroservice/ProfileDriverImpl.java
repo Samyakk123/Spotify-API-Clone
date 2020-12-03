@@ -145,13 +145,13 @@ public class ProfileDriverImpl implements ProfileDriver {
             List<Record> recordsTwo = responseTwo.list(); 
             for(int j = 0; j < recordsTwo.size(); j++) { 
               Value songTitle = recordsTwo.get(j).get("c.title"); 
-              System.out.println(songTitle); 
               temp.add(songTitle.toString().substring(1, songTitle.toString().length() - 1));
             }
             data.put(friendTemp, temp);
             
           }
-          toReturn.setData(data.toString());
+          toReturn.setData(data);
+          System.out.println(toReturn.getData()); 
           trans.success();
         }
         session.close();
