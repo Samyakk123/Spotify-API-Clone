@@ -48,35 +48,44 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	  ObjectMapper mapper = new ObjectMapper();
 	  HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost:3001" + "/getSongTitleById/" + songId).newBuilder();
 	  
-//	  urlBuilder.addQueryParameter("songId", songId);
+	  ObjectMapper mapper2 = new ObjectMapper();
+	  HttpUrl.Builder urlBuilder2 = HttpUrl.parse("http://localhost:3001" +  "/updateSongFavouritesCount/" + songId + "/?shouldDecrement=false").newBuilder();
 	  
+//	  urlBuilder.addQueryParameter("songId", songId);	  
 	  // urlBuilder.addPathSegment(songId); ^^?
 	  
 	  
 	  String url = urlBuilder.build().toString();
+	  String url2 = urlBuilder2.build().toString();
 	  
-//	  RequestBody body = RequestBody.create(null, new byte[0]);
+	  RequestBody body = RequestBody.create(null, new byte[0]);
 
 	  Request request = new Request.Builder().url(url).build();
+	  Request request2 = new Request.Builder().url(url2).method("PUT", body).build();
+	  
 	  Call call = client.newCall(request);
+	  Call call2 = client.newCall(request2);
 	  
 	  Response responseFromAddMs = null;
 	  String addServiceBody = "{}";
 	  
+	  Response responseFromAddMs2 = null;
+	  String addServiceBody2 = "{}";
+	  
 	  try {
 
+
 	    responseFromAddMs = call.execute();
+        responseFromAddMs2 = call2.execute();
 
-	    
-	    
 	    addServiceBody = responseFromAddMs.body().string();
+	    addServiceBody2 = responseFromAddMs2.body().string();
 	    
-	    
-	    mapper.readValue(addServiceBody, Map.class);
-	    
-	    
-	    String song = (String) mapper.readValue(addServiceBody, Map.class).get("data");
 
+	    
+	    
+
+	    String song = (String) mapper.readValue(addServiceBody, Map.class).get("data");
 	    // Verify that it was returned
 	    if(song == null) {
 	      toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
@@ -86,7 +95,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      
 	      try (Session session = ProfileMicroserviceApplication.driver.session()) {
 	        try (Transaction trans = session.beginTransaction()) {
-	          System.out.println("hi"); 
 	             Map<String, Object> toInsert = new HashMap<String, Object>(); 
 	             toInsert.put("userName", userName);
 	             toInsert.put("plName", userName + "-favorites");
@@ -97,17 +105,19 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	                 + " MERGE (b)-[d:favorites]-(c:song {title:$song, id: $id})", toInsert);
 	             trans.success();
 	             
-//	             MATCH (a:profile {userName: "test"})-[r:created]->(b:playlist {plName:"test-favorites"})
-//	             MERGE (b)-[d:created]-(c:song {title: "I should have came"})
-	             
+	        }catch(Exception e) {
+	          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	        }
 	        session.close();
-	        return toReturn; 
 	        
 	      }catch(Exception e) {
 	        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
-	      }    
 
+	      }    
+	      
+	      return toReturn;
+
+	      
 	    
 	    
 	    
@@ -116,6 +126,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	    
 	    
 	  }catch(Exception e) {
+	    System.out.println("here3: " + e);
 	    toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	  }
 	  
@@ -128,6 +139,31 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	@Override
 	public DbQueryStatus unlikeSong(String userName, String songId) {
 		toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost:3001" + "/updateSongFavouritesCount/" + songId + "/?shouldDecrement=true").newBuilder();
+		
+		urlBuilder.addQueryParameter("songId", songId);
+		
+		String url = urlBuilder.build().toString();
+		RequestBody body = RequestBody.create(null, new byte[0]);
+		
+		Request request = new Request.Builder().url(url).method("PUT", body).build();
+		
+		Call call = client.newCall(request);
+		
+		Response responseFromAddMs = null;
+		String addServiceBody = "{}";
+		
+		try {
+		  responseFromAddMs = call.execute();
+		  addServiceBody = responseFromAddMs.body().string();
+		  System.out.println("here: " + addServiceBody);
+		}catch(Exception e) {
+		  toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+		  return toReturn;
+		}
+		
 		
 		try(Session session = ProfileMicroserviceApplication.driver.session()){
 		  try(Transaction trans = session.beginTransaction()){
@@ -161,7 +197,26 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 
 	@Override
 	public DbQueryStatus deleteSongFromDb(String songId) {
-		
-		return null;
+	  toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+	  try(Session session = ProfileMicroserviceApplication.driver.session()){
+	    try(Transaction trans = session.beginTransaction()){
+	      Map<String, Object> deleteAll = new HashMap<String, Object>();
+	      deleteAll.put("songId", songId);
+	      
+	      trans.run("MATCH (a:song {id:$songId})\n" + "DETACH DELETE a", deleteAll);
+	      trans.success();
+	    }catch(Exception e) {
+	      toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+	    }
+	    session.close();
+	  }catch(Exception e) {
+	    toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+	  }
+	  
+	  return toReturn;
+	  
+//	  MATCH (a:song {id: "5fc312a84079b40ab0e0264f"})
+//	  DETACH DELETE a
+	  
 	}
 }
