@@ -101,6 +101,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	             toInsert.put("song", song);
 	             toInsert.put("id", songId);
 	             
+	             
 	             trans.run("\n MATCH (a:profile {userName:$userName})-[r:created]->(b:playlist {plName:$plName})\n"
 	                 + " MERGE (b)-[d:favorites]-(c:song {title:$song, id: $id})", toInsert);
 	             trans.success();
@@ -141,6 +142,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
 		
 
+
 		
 		try(Session session = ProfileMicroserviceApplication.driver.session()){
 		  try(Transaction trans = session.beginTransaction()){
@@ -149,6 +151,13 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		    toRemove.put("plName", userName + "-favorites");
 		    toRemove.put("songId", songId);
 		    toRemove2.put("id", songId);
+		    
+		    // Check null case
+		    Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:favorites]->(b:song {id:$songId})\n RETURN r", toRemove);
+            if(!variable.hasNext()) {
+              toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+              return toReturn;
+            }
 		    
 		    trans.run("MATCH (a:playlist {plName:$plName})-[r:favorites]->(b:song {id:$songId})\n"
 		        + "DELETE r", toRemove);
