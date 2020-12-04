@@ -126,7 +126,7 @@ public class ProfileDriverImpl implements ProfileDriver {
       try (Session session = ProfileMicroserviceApplication.driver.session()){
         try( Transaction trans = session.beginTransaction()){
           Map<String, Object> toInsert = new HashMap<String, Object>();
-          JSONObject data = new JSONObject(); 
+          Map<String, Object> data = new HashMap<String, Object>(); 
           
           toInsert.put("userName", userName);
           StatementResult responseOne = trans.run("MATCH (a:profile {userName:$userName})-[r:FRIENDS]->(b:profile) \n RETURN b.userName", toInsert);
@@ -151,7 +151,6 @@ public class ProfileDriverImpl implements ProfileDriver {
             
           }
           toReturn.setData(data);
-          System.out.println(toReturn.getData()); 
           trans.success();
         }
         session.close();

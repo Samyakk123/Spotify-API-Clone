@@ -1,5 +1,6 @@
 package com.csc301.profilemicroservice;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -131,7 +132,7 @@ public class ProfileController {
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		if(userName != null && songId != null) {
 		  DbQueryStatus status = playlistDriver.likeSong(userName, songId);
-		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), (JSONObject) status.getData());
 		}
 		else {
 		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
