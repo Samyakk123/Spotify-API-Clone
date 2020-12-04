@@ -114,7 +114,6 @@ public class SongDalImpl implements SongDal {
     try {
       ObjectId temp = new ObjectId(songId);
       db.getCollection("songs").deleteOne(Filters.eq("_id", temp));
-      toReturn.setData("OK");
     } catch (Exception e) {
       toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
     }
@@ -130,6 +129,7 @@ public class SongDalImpl implements SongDal {
     
     //If findSongById returns a generic error, then error is returned here before incrementing / decrementing 
     if(status.getdbQueryExecResult() != DbQueryExecResult.QUERY_OK) { 
+      //Checks if Id is not a proper id format and changes the status to not found 
       try {
         ObjectId temp = new ObjectId(songId);
         toReturn.setdbQueryExecResult(status.getdbQueryExecResult());
@@ -138,7 +138,7 @@ public class SongDalImpl implements SongDal {
         toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
       }
       return toReturn; 
-    }
+    } 
     Song returnVal = (Song) status.getData();
     
     //Increments or decrements depending on shouldDecrement value 
@@ -154,20 +154,11 @@ public class SongDalImpl implements SongDal {
     if((currentVal + increment) < 0) { 
       returnVal.setSongAmountFavourites(0);
     }
+    //Updates the database with the new increment 
     db.getCollection("songs").updateOne(Filters.eq("_id", new ObjectId(songId)),
         Updates.set("songAmountFavourites", currentVal + increment));
     toReturn.setData(returnVal);
     return toReturn;
-
-
-    // DbQueryStatus status = songDal.findSongById(songId);
-    // Song returnVal = (Song) status.getData();
-    //
-    // long currentVal = returnVal.getSongAmountFavourites();
-    //
-    // long increment = Integer.parseInt(shouldDecrement);
-    //
-    // returnVal.setSongAmountFavourites(currentVal + increment);
 
   }
 }
