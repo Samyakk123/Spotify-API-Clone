@@ -62,7 +62,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	        return toReturn; 
 	      }
 	      
-	      Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n RETURN r", checkValid);
+	      Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {songId:$songId})\n RETURN r", checkValid);
 	      // Check if a result was found
 	      if(variable.hasNext()) {
 	        return toReturn;
@@ -127,7 +127,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      toInsert.put("songId", songId);
 	             
 	      System.out.println("Something here");
-	      trans.run("MATCH (a:playlist {plName:$plName})\n" + "MERGE (b:song {id:$songId, title:$song})\n" + "MERGE (a)-[r:includes]->(b)\n" + "RETURN r", toInsert);
+	      trans.run("MATCH (a:playlist {plName:$plName})\n" + "MERGE (b:song {songId:$songId, title:$song})\n" + "MERGE (a)-[r:includes]->(b)\n" + "RETURN r", toInsert);
 	      
 //	      trans.run("\n MATCH (a:profile {userName:$userName})-[r:created]->(b:playlist {plName:$plName})\n"
 //	                 + " MERGE (b)-[d:includes]-(c:song {title:$song, id: $id})", toInsert);
@@ -158,20 +158,19 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		try(Session session = ProfileMicroserviceApplication.driver.session()){
 		  try(Transaction trans = session.beginTransaction()){
 		    Map<String, Object> toRemove = new HashMap<String, Object>();
-		    Map<String, Object> toRemove2 = new HashMap<String, Object>();
 		    toRemove.put("plName", userName + "-favorites");
 		    toRemove.put("songId", songId);
-		    toRemove2.put("id", songId);
+
 		    
 		    // Check null case [Whether the relation actually does exist]
-		    Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n RETURN r", toRemove);
+		    Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {songId:$songId})\n RETURN r", toRemove);
             if(!variable.hasNext()) {
               toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
               return toReturn;
             }
 		    // Delete the relationship between the playlist and the song node
-            System.out.println("somehting: " + toRemove.toString());
-		    trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n" + "DELETE r", toRemove);
+
+		    trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {songId:$songId})\n" + "DELETE r", toRemove);
 		    // Then delete the song node afterwards
 
 		    
@@ -225,7 +224,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      Map<String, Object> deleteAll = new HashMap<String, Object>();
 	      deleteAll.put("songId", songId);
 	      // DETACH all relationships between the song node and then delete it
-	      trans.run("MATCH (a:song {id:$songId})\n" + "DETACH DELETE a", deleteAll);
+	      trans.run("MATCH (a:song {songId:$songId})\n" + "DETACH DELETE a", deleteAll);
 	      trans.success();
 	    }catch(Exception e) {
 	      toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
