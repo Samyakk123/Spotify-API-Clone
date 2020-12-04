@@ -54,7 +54,7 @@ public class SongController {
             Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
           }
           catch(Exception e) { 
-            Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+            Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_NOT_FOUND, null);
           }
         }
         else {
@@ -72,15 +72,24 @@ public class SongController {
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("path", String.format("GET %s", Utils.getUrl(request)));
         
+        //Checks if the required param is there, if it is then we search for the song with id 
+        //Otherwise status is given as an internal server error
         if(songId != null) {
           try { 
-            //to check if the id is a valid id format
+            //Checks if the id format is correct 
             ObjectId temp = new ObjectId(songId);
             DbQueryStatus status = songDal.getSongTitleById(songId);
-            Utils.setResponseStatus(response, status.getdbQueryExecResult(), ((Song) status.getData()).getSongName());
+            //Checks if the data is not null which means song is found, otherwise not found and the proper 
+            //data and status are returned accordingly 
+            if(status.getData() != null) { 
+              Utils.setResponseStatus(response, status.getdbQueryExecResult(), ((Song) status.getData()).getSongName());
+            } 
+            else { 
+              Utils.setResponseStatus(response, status.getdbQueryExecResult(), null);
+            }
           }
           catch(Exception e){ 
-            Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+            Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_NOT_FOUND, null);
           }
         }
         else {
@@ -117,7 +126,11 @@ public class SongController {
         String songArtistFullName = params.get("songArtistFullName");
         String songAlbum = params.get("songAlbum");
         
+        //Checks if all the required parameters are there, if they are not there, 
+        //changes response status to internal server error 
         if(songName != null && songArtistFullName != null && songAlbum != null) {
+          //Adds song to the database and updates response with the necessary data and response 
+          //status 
           Song song = new Song(songName, songArtistFullName, songAlbum);
           DbQueryStatus status = songDal.addSong(song);
           Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
@@ -137,11 +150,14 @@ public class SongController {
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("data", String.format("PUT %s", Utils.getUrl(request)));
         
-        boolean updateDecrement = Boolean.parseBoolean(shouldDecrement);
-        
-        DbQueryStatus status = songDal.updateSongFavouritesCount(songId, updateDecrement);
-        
-        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        if(shouldDecrement == "true" || shouldDecrement == "false") {
+          boolean updateDecrement = Boolean.parseBoolean(shouldDecrement);
+          DbQueryStatus status = songDal.updateSongFavouritesCount(songId, updateDecrement);
+          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        }
+        else { 
+          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+        }
         
         return response;
     
