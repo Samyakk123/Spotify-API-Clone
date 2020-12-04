@@ -85,6 +85,8 @@ public class ProfileDriverImpl implements ProfileDriver {
 	  toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
 	  try (Session session = ProfileMicroserviceApplication.driver.session()){
 	    try( Transaction trans = session.beginTransaction()){
+	      
+	      // Create toInsert map
 	      Map<String, Object> toInsert = new HashMap<String, Object>();
 	      toInsert.put("userName", userName);
 	      toInsert.put("frndUserName", frndUserName);
