@@ -161,7 +161,7 @@ public class SongDalImpl implements SongDal {
     //Updates the database with the new increment 
     db.getCollection("songs").updateOne(Filters.eq("_id", new ObjectId(songId)),
         Updates.set("songAmountFavourites", currentVal + increment));
-    toReturn.setData(returnVal);
+    
     return toReturn;
 
   }

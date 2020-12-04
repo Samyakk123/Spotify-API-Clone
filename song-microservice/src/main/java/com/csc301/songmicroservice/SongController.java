@@ -145,7 +145,7 @@ public class SongController {
       @RequestParam("shouldDecrement") String shouldDecrement, HttpServletRequest request) {
 
     Map<String, Object> response = new HashMap<String, Object>();
-    response.put("data", String.format("PUT %s", Utils.getUrl(request)));
+    response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 
     // Checks if shouldDecrement is true or false, if none of those two then gives an internal
     // server error
@@ -153,7 +153,7 @@ public class SongController {
       // Gets the boolean value of shouldDecrement and updates the song in the database
       boolean updateDecrement = Boolean.parseBoolean(shouldDecrement);
       DbQueryStatus status = songDal.updateSongFavouritesCount(songId, updateDecrement);
-      Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+      Utils.setResponseStatus(response, status.getdbQueryExecResult(), null);
     } else {
       Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
     }
