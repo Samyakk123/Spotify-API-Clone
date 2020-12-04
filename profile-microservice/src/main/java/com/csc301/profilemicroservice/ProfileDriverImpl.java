@@ -90,6 +90,20 @@ public class ProfileDriverImpl implements ProfileDriver {
 	      Map<String, Object> toInsert = new HashMap<String, Object>();
 	      toInsert.put("userName", userName);
 	      toInsert.put("frndUserName", frndUserName);
+	      
+	      Iterator<Record> check1 = trans.run("MATCH (a:profile {userName:$userName})\nReturn a", toInsert);
+	      Iterator<Record> check2 = trans.run("MATCH (b:profile {userName:$frndUserName})\nReturn b", toInsert);
+	      if(!check1.hasNext() || !check2.hasNext()) {
+	        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+	        return toReturn;
+	      }
+	      
+	      Iterator<Record> check3 = trans.run("MATCH (a:profile {userName:$userName})-[r:follows]->(b:profile {userName:$frndUserName})\nReturn r", toInsert);
+	      if(check3.hasNext()) {
+            toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+            return toReturn;	        
+	      }
+	      // Look for matching profiles and create a relationship between them
 	      trans.run("MATCH (a:profile {userName:$userName}), (b:profile {userName:$frndUserName})\n" + "CREATE (a)-[r:follows]->(b)\n" + "RETURN type(r)", toInsert);
 	      trans.success();
 	    }
@@ -110,15 +124,30 @@ public class ProfileDriverImpl implements ProfileDriver {
       toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
       try (Session session = ProfileMicroserviceApplication.driver.session()){
         try( Transaction trans = session.beginTransaction()){
+          // Create the toInsert Map
           Map<String, Object> toInsert = new HashMap<String, Object>();
           toInsert.put("userName", userName);
           toInsert.put("frndUserName", frndUserName);
+          
+          Iterator<Record> check1 = trans.run("MATCH (a:profile {userName:$userName})\nReturn a", toInsert);
+          Iterator<Record> check2 = trans.run("MATCH (b:profile {userName:$frndUserName})\nReturn b", toInsert);
+          if(!check1.hasNext() || !check2.hasNext()) {
+            toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+            return toReturn;
+          }
+          
+          Iterator<Record> check3 = trans.run("MATCH (a:profile {userName:$userName})-[r:follows]->(b:profile {userName:$frndUserName})\nReturn r", toInsert);
+          if(!check3.hasNext()) {
+            toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+            return toReturn;            
+          }          
+          
+          
+          // Find the relationship between the two profiles, and then delete their relationship
           trans.run("MATCH (a:profile {userName:$userName})-[r:follows]->(b:profile {userName:$frndUserName})\n" + "DELETE r" , toInsert);
           trans.success();
-          
-          
-          
         }
+        // Close the session afterwards
         session.close();
         return toReturn;
       }catch(Exception e) {

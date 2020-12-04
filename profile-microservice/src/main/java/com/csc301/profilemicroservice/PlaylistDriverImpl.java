@@ -61,6 +61,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	        return toReturn; 
 	      }
+	      
 	      Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n RETURN r", checkValid);
 	      // Check if a result was found
 	      if(variable.hasNext()) {
@@ -121,17 +122,19 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      // Create the NEO4J command to create a relationship between song and user playlist
 	      
 	      Map<String, Object> toInsert = new HashMap<String, Object>(); 
-	      toInsert.put("userName", userName);
 	      toInsert.put("plName", userName + "-favorites");
 	      toInsert.put("song", song);
-	      toInsert.put("id", songId);
+	      toInsert.put("songId", songId);
 	             
-	             
-	      trans.run("\n MATCH (a:profile {userName:$userName})-[r:created]->(b:playlist {plName:$plName})\n"
-	                 + " MERGE (b)-[d:includes]-(c:song {title:$song, id: $id})", toInsert);
+	      System.out.println("Something here");
+	      trans.run("MATCH (a:playlist {plName:$plName})\n" + "MERGE (b:song {id:$songId, title:$song})\n" + "MERGE (a)-[r:includes]->(b)\n" + "RETURN r", toInsert);
+	      
+//	      trans.run("\n MATCH (a:profile {userName:$userName})-[r:created]->(b:playlist {plName:$plName})\n"
+//	                 + " MERGE (b)-[d:includes]-(c:song {title:$song, id: $id})", toInsert);
 	      trans.success();
 	             
 	    }catch(Exception e) {
+	      System.out.println("error: " + e);
 	      toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	    }
 	      session.close();
@@ -167,11 +170,10 @@ public class PlaylistDriverImpl implements PlaylistDriver {
               return toReturn;
             }
 		    // Delete the relationship between the playlist and the song node
-		    trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n"
-		        + "DELETE r", toRemove);
+            System.out.println("somehting: " + toRemove.toString());
+		    trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n" + "DELETE r", toRemove);
 		    // Then delete the song node afterwards
-		    trans.run("MATCH (a:song {id:$id})\n"
-		        + "DELETE a", toRemove2);
+
 		    
 		    trans.success();
 
@@ -197,6 +199,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	          responseFromAddMs = call.execute();
 	          addServiceBody = responseFromAddMs.body().string();
 	        }catch(Exception e) {
+	          System.out.println(e);
 	          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	          return toReturn;
 	        }
@@ -205,6 +208,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		  session.close();
 		  
 		}catch(Exception e) {
+		  System.out.println(e);
 		  toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 		  
 		}
