@@ -118,6 +118,7 @@ public class ProfileController {
 	public @ResponseBody Map<String, Object> likeSong(@PathVariable("userName") String userName,
 			@PathVariable("songId") String songId, HttpServletRequest request) {
 
+	    System.out.println("AM I PRINTING?");
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		if(userName != null && songId != null) {
@@ -125,6 +126,7 @@ public class ProfileController {
 		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 		}
 		else {
+		  System.out.println("here4");
 		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
 		}
 		return response;
@@ -136,8 +138,14 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+        if(userName != null && songId != null) {
+          DbQueryStatus status = playlistDriver.unlikeSong(userName, songId);
+          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        }
+        else {
+          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+        }
+        return response;
 	}
 
 	@RequestMapping(value = "/deleteAllSongsFromDb/{songId}", method = RequestMethod.PUT)
@@ -147,6 +155,14 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		
-		return null;
+		
+		if(songId != null) {
+		  DbQueryStatus status = playlistDriver.deleteSongFromDb(songId);
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		}else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		
+		return response;
 	}
 }

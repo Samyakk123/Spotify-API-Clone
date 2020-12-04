@@ -9,15 +9,24 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import okhttp3.Call;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Repository
 public class SongDalImpl implements SongDal {
 
     private final MongoTemplate db;
     private DbQueryStatus toReturn = null;
+    
+    OkHttpClient client = new OkHttpClient();
 
     @Autowired
     public SongDalImpl(MongoTemplate mongoTemplate) {
@@ -79,6 +88,25 @@ public class SongDalImpl implements SongDal {
         // TODO Auto-generated method stub
       toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
 
+      
+      ObjectMapper mapper = new ObjectMapper();
+      HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost:3002" + "/deleteAllSongsFromDb/" + songId).newBuilder();
+      
+      String url = urlBuilder.build().toString();
+      RequestBody body = RequestBody.create(null, new byte[0]);
+      Request request = new Request.Builder().url(url).method("PUT", body).build();
+      
+      Call call = client.newCall(request);
+      Response responseFromAddMs = null;
+      String addServiceBody = "{}";
+      
+      try {
+        responseFromAddMs = call.execute();
+        addServiceBody = responseFromAddMs.body().string();
+      }catch(Exception e) {
+        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+        return toReturn;
+      }
       
       try {
         ObjectId temp = new ObjectId(songId);
