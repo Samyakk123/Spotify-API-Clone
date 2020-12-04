@@ -90,7 +90,7 @@ public class ProfileDriverImpl implements ProfileDriver {
 	      Map<String, Object> toInsert = new HashMap<String, Object>();
 	      toInsert.put("userName", userName);
 	      toInsert.put("frndUserName", frndUserName);
-	      trans.run("MATCH (a:profile {userName:$userName}), (b:profile {userName:$frndUserName})\n" + "CREATE (a)-[r:FRIENDS]->(b)\n" + "RETURN type(r)", toInsert);
+	      trans.run("MATCH (a:profile {userName:$userName}), (b:profile {userName:$frndUserName})\n" + "CREATE (a)-[r:follows]->(b)\n" + "RETURN type(r)", toInsert);
 	      trans.success();
 	    }
 	    session.close();
@@ -113,11 +113,9 @@ public class ProfileDriverImpl implements ProfileDriver {
           Map<String, Object> toInsert = new HashMap<String, Object>();
           toInsert.put("userName", userName);
           toInsert.put("frndUserName", frndUserName);
-          trans.run("MATCH (a:profile {userName:$userName})-[r:FRIENDS]->(b:profile {userName:$frndUserName})\n" + "DELETE r" , toInsert);
+          trans.run("MATCH (a:profile {userName:$userName})-[r:follows]->(b:profile {userName:$frndUserName})\n" + "DELETE r" , toInsert);
           trans.success();
           
-//          MATCH (a:profile {userName: "awesome"})-[r:FRIENDS]->(b:profile {userName: "anotherName"})
-//          DELETE r
           
           
         }
@@ -138,7 +136,7 @@ public class ProfileDriverImpl implements ProfileDriver {
           Map<String, Object> data = new HashMap<String, Object>(); 
           
           toInsert.put("userName", userName);
-          StatementResult responseOne = trans.run("MATCH (a:profile {userName:$userName})-[r:FRIENDS]->(b:profile) \n RETURN b.userName", toInsert);
+          StatementResult responseOne = trans.run("MATCH (a:profile {userName:$userName})-[r:follows]->(b:profile) \n RETURN b.userName", toInsert);
           List<Record> records = responseOne.list();      
           for(int i = 0; i < records.size(); i++) {
             //assuming userName cannot be duplicate !!! 
@@ -149,7 +147,7 @@ public class ProfileDriverImpl implements ProfileDriver {
             toInsertTwo.put("friend", friendTemp); 
             toInsertTwo.put("plName", friendTemp + "-favorites"); 
             StatementResult responseTwo = trans.run("MATCH (a:profile {userName:$friend})-[r:created]->(b:playlist {plName:$plName})"
-                + "MATCH (b:playlist)-[d:favorites]->(c:song) \n "
+                + "MATCH (b:playlist)-[d:includes]->(c:song) \n "
                 + "RETURN c.title", toInsertTwo);
             List<Record> recordsTwo = responseTwo.list(); 
             for(int j = 0; j < recordsTwo.size(); j++) { 

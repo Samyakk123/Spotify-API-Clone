@@ -54,7 +54,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      Map<String, Object> checkValid = new HashMap<String, Object>();
 	      checkValid.put("songId", songId);
 	      checkValid.put("plName", userName + "-favorites");
-	      Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:favorites]->(b:song {id:$songId})\n RETURN r", checkValid);
+	      Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n RETURN r", checkValid);
 	      // Check if a result was found
 	      if(variable.hasNext()) {
 	        return toReturn;
@@ -125,7 +125,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	             
 	             
 	      trans.run("\n MATCH (a:profile {userName:$userName})-[r:created]->(b:playlist {plName:$plName})\n"
-	                 + " MERGE (b)-[d:favorites]-(c:song {title:$song, id: $id})", toInsert);
+	                 + " MERGE (b)-[d:includes]-(c:song {title:$song, id: $id})", toInsert);
 	      trans.success();
 	             
 	    }catch(Exception e) {
@@ -161,13 +161,13 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		    toRemove2.put("id", songId);
 		    
 		    // Check null case [Whether the relation actually does exist]
-		    Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:favorites]->(b:song {id:$songId})\n RETURN r", toRemove);
+		    Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n RETURN r", toRemove);
             if(!variable.hasNext()) {
               toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
               return toReturn;
             }
 		    // Delete the relationship between the playlist and the song node
-		    trans.run("MATCH (a:playlist {plName:$plName})-[r:favorites]->(b:song {id:$songId})\n"
+		    trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n"
 		        + "DELETE r", toRemove);
 		    // Then delete the song node afterwards
 		    trans.run("MATCH (a:song {id:$id})\n"

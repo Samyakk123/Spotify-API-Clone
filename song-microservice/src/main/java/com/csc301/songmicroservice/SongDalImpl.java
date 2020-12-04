@@ -40,7 +40,7 @@ public class SongDalImpl implements SongDal {
     // accordingly and returning it
     try {
       db.insert(songToAdd, "songs");
-      toReturn.setData(songToAdd);
+      toReturn.setData(songToAdd.getJsonRepresentation());
       return toReturn;
     } catch (Exception e) {
       toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
