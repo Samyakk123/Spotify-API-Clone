@@ -30,7 +30,6 @@ public class SongController {
   @Autowired
   private final SongDal songDal;
 
-  private OkHttpClient client = new OkHttpClient();
 
 
   public SongController(SongDal songDal) {

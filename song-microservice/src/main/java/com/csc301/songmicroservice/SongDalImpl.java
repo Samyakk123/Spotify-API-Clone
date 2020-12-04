@@ -51,13 +51,17 @@ public class SongDalImpl implements SongDal {
 
   @Override
   public DbQueryStatus findSongById(String songId) {
+    // Initially set it to OK
     toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
     try {
+      // Find the database inside the database Song class using the provided songId
       Song found = db.findById(songId, Song.class);
+      // Check does not exist case
       if (found == null) {
         toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
         return toReturn;
       }
+      // return the found Song Object
       toReturn.setData(found);
       return toReturn;
     } catch (Exception e) {
