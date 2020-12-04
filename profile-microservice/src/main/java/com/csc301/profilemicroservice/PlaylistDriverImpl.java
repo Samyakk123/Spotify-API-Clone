@@ -52,8 +52,15 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      
 	      // Checks if it is already pre-existing in the neo4j database
 	      Map<String, Object> checkValid = new HashMap<String, Object>();
+	      Map<String, Object> checkValidTwo = new HashMap<String, Object>();
 	      checkValid.put("songId", songId);
 	      checkValid.put("plName", userName + "-favorites");
+	      checkValidTwo.put("plName", userName + "-favorites"); 
+	      Iterator<Record> checkUserName = trans.run("MATCH (a:playlist {plName:$plName})\n RETURN a", checkValidTwo);
+	      if(!checkUserName.hasNext()) { 
+	        toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+	        return toReturn; 
+	      }
 	      Iterator<Record> variable = trans.run("MATCH (a:playlist {plName:$plName})-[r:includes]->(b:song {id:$songId})\n RETURN r", checkValid);
 	      // Check if a result was found
 	      if(variable.hasNext()) {
@@ -71,13 +78,9 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      // This one is to update the favourites count
 	      HttpUrl.Builder urlBuilder2 = HttpUrl.parse("http://localhost:3001" +  "/updateSongFavouritesCount/" + songId + "/?shouldDecrement=false").newBuilder();
 	      
-
-	      
-	      
 	      String url = urlBuilder.build().toString();
 	      String url2 = urlBuilder2.build().toString();
-	      
-	      
+	            
 	      RequestBody body = RequestBody.create(null, new byte[0]);
 
 	      Request request = new Request.Builder().url(url).build();
@@ -148,10 +151,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	@Override
 	public DbQueryStatus unlikeSong(String userName, String songId) {
 		toReturn = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-		
 
-
-		
 		try(Session session = ProfileMicroserviceApplication.driver.session()){
 		  try(Transaction trans = session.beginTransaction()){
 		    Map<String, Object> toRemove = new HashMap<String, Object>();
@@ -196,13 +196,10 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	          // execute the call
 	          responseFromAddMs = call.execute();
 	          addServiceBody = responseFromAddMs.body().string();
-	          System.out.println("here: " + addServiceBody);
 	        }catch(Exception e) {
 	          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	          return toReturn;
 	        }
-	        
-		    
 
 		  }
 		  session.close();
@@ -211,11 +208,8 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		  toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 		  
 		}
-		
-		
-		return toReturn;
-		
 
+		return toReturn;
 	}
 
 	@Override
