@@ -236,11 +236,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	  }catch(Exception e) {
 	    toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	  }
-	  
 	  return toReturn;
-	  
-//	  MATCH (a:song {id: "5fc312a84079b40ab0e0264f"})
-//	  DETACH DELETE a
-	  
 	}
 }

@@ -2,6 +2,7 @@ package com.csc301.profilemicroservice;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
@@ -56,7 +57,13 @@ public class ProfileDriverImpl implements ProfileDriver {
     	     toInsertTwo.put("plName", userName + "-favorites"); 
     	     toInsertThree.put("userName", userName); 
     	     toInsertThree.put("plName", userName + "-favorites"); 
+    	     Iterator<Record> checkExisting = trans.run("MATCH (a:profile {userName: $userName, fullName: $fullName, password: $password})\nRETURN a", toInsert);
+	         if(checkExisting.hasNext()) {
+	           toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+	           return toReturn;
+	         }
     	     trans.run("MERGE (a:profile {userName: $userName, fullName: $fullName, password: $password})", toInsert);
+
     	     trans.run("MERGE (a:playlist {plName:$plName})", toInsertTwo); 
     	     trans.run("MATCH (a:profile {userName: $userName}), (b:playlist {plName:$plName}) \n MERGE (a)-[r:created]->(b)", toInsertThree); 
     	     trans.success();
