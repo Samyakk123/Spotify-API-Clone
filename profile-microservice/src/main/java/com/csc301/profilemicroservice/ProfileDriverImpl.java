@@ -165,6 +165,12 @@ public class ProfileDriverImpl implements ProfileDriver {
           Map<String, Object> data = new HashMap<String, Object>(); 
           
           toInsert.put("userName", userName);
+          
+          Iterator<Record> checkUserExists = trans.run("MATCH (a:profile {userName:$userName}) /n RETURN a", toInsert); 
+          if(!checkUserExists.hasNext()) { 
+            toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
+            return toReturn;
+          }
           StatementResult responseOne = trans.run("MATCH (a:profile {userName:$userName})-[r:follows]->(b:profile) \n RETURN b.userName", toInsert);
           List<Record> records = responseOne.list();      
           for(int i = 0; i < records.size(); i++) {
