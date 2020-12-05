@@ -57,16 +57,16 @@ public class ProfileController {
 		String userName = params.get("userName");
         String fullName = params.get("fullName");
         String password = params.get("password");
-        
+        // Check if userName, full name, or password is not null
         if(userName != null && fullName != null && password != null) {
-
+        // Call the createUserProfile method and store it inside DbQueryStatus variable
           DbQueryStatus status = profileDriver.createUserProfile(userName, fullName, password); 
           Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
         }
         else {
           Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
         }
-       
+        // Send the response back
         return response;
 	}
 
@@ -76,14 +76,16 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-		
+		// Check that friendUserName and UserName are not null
 		if(friendUserName != null && userName!=null) {
 		  DbQueryStatus status = profileDriver.followFriend(userName, friendUserName);
+		  // Set the responseStatus with the return values obtained from followFriend();
 		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 		}
 		else {
 		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
 		}
+		// Send the response back
 		return response;
 	}
 
@@ -93,16 +95,16 @@ public class ProfileController {
 
 	  Map<String, Object> response = new HashMap<String, Object>();
       response.put("path", String.format("GET %s", Utils.getUrl(request)));
-      
+      // Check that the userName is provided
       if(userName != null) {
-
+        // Call the getAllSongFriendsLike method in playilstDriverImpl
         DbQueryStatus status = profileDriver.getAllSongFriendsLike(userName); 
         Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
       }
       else {
         Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
       }
-     
+      // Send the response back
       return response;
 	}
 
@@ -113,14 +115,16 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-		
+		  // Check if friendUserName and userName are provided
 	      if(friendUserName != null && userName!=null) {
+	        // Call the unfollowFriend method in the playlist driver class
 	          DbQueryStatus status = profileDriver.unfollowFriend(userName, friendUserName);
 	          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	        }
 	        else {
 	          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
 	        }
+	      // send the response back
 	        return response;
 	}
 
@@ -128,17 +132,18 @@ public class ProfileController {
 	public @ResponseBody Map<String, Object> likeSong(@PathVariable("userName") String userName,
 			@PathVariable("songId") String songId, HttpServletRequest request) {
 
-	    System.out.println("AM I PRINTING?");
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		// Check that username and songId are provided
 		if(userName != null && songId != null) {
 		  DbQueryStatus status = playlistDriver.likeSong(userName, songId);
+		  // Set Utils to the values received back
 		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), (JSONObject) status.getData());
 		}
 		else {
-		  System.out.println("here4");
 		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
 		}
+		// send the response back
 		return response;
 	}
 
@@ -148,13 +153,16 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		// Check that userName and songId are provided
         if(userName != null && songId != null) {
           DbQueryStatus status = playlistDriver.unlikeSong(userName, songId);
           Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
         }
         else {
+          // If path variables are not provided then return with an error code
           Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
         }
+     // Send the response back
         return response;
 	}
 
@@ -165,14 +173,14 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		
-		
+		// Verify that the songId is provided
 		if(songId != null) {
 		  DbQueryStatus status = playlistDriver.deleteSongFromDb(songId);
 		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 		}else {
 		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
 		}
-		
+		// Send the response back
 		return response;
 	}
 }
