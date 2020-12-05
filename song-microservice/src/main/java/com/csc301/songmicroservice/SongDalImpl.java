@@ -156,10 +156,14 @@ public class SongDalImpl implements SongDal {
     //Assures that the songAmountFavourites value cannot go under 0
     if((currentVal + increment) < 0) { 
       returnVal.setSongAmountFavourites(0);
+      db.getCollection("songs").updateOne(Filters.eq("_id", new ObjectId(songId)),
+          Updates.set("songAmountFavourites", 0));
     }
-    //Updates the database with the new increment 
-    db.getCollection("songs").updateOne(Filters.eq("_id", new ObjectId(songId)),
-        Updates.set("songAmountFavourites", currentVal + increment));
+    else { 
+      //Updates the database with the new increment 
+      db.getCollection("songs").updateOne(Filters.eq("_id", new ObjectId(songId)),
+          Updates.set("songAmountFavourites", currentVal + increment));
+    } 
     
     return toReturn;
 
