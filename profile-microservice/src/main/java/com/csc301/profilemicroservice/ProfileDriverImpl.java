@@ -10,6 +10,7 @@ import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Value;
 
 import org.springframework.stereotype.Repository;
 import org.neo4j.driver.v1.Transaction;
@@ -18,7 +19,8 @@ import org.neo4j.driver.v1.Transaction;
 public class ProfileDriverImpl implements ProfileDriver {
 
 	Driver driver = ProfileMicroserviceApplication.driver;
-
+	DbQueryStatus toReturn = null;
+	
 	public static void InitProfileDb() {
 		String queryStr;
 
