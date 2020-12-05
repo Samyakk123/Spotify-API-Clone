@@ -1,5 +1,6 @@
 package com.csc301.profilemicroservice;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,8 +53,22 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("POST %s", Utils.getUrl(request)));
+		
+		String userName = params.get("userName");
+        String fullName = params.get("fullName");
+        String password = params.get("password");
+        // Check if userName, full name, or password is not null
+        if(userName != null && fullName != null && password != null) {
+        // Call the createUserProfile method and store it inside DbQueryStatus variable
+          DbQueryStatus status = profileDriver.createUserProfile(userName, fullName, password); 
+          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        }
+        else {
+          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+        }
+        // Send the response back
+        return response;
 
-		return null;
 	}
 
 	@RequestMapping(value = "/followFriend/{userName}/{friendUserName}", method = RequestMethod.PUT)
@@ -62,18 +77,36 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-		
-		return null;
+		// Check that friendUserName and UserName are not null
+		if(friendUserName != null && userName!=null) {
+		  DbQueryStatus status = profileDriver.followFriend(userName, friendUserName);
+		  // Set the responseStatus with the return values obtained from followFriend();
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		}
+		else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		// Send the response back
+		return response;
 	}
 
 	@RequestMapping(value = "/getAllFriendFavouriteSongTitles/{userName}", method = RequestMethod.GET)
 	public @ResponseBody Map<String, Object> getAllFriendFavouriteSongTitles(@PathVariable("userName") String userName,
 			HttpServletRequest request) {
 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+	  Map<String, Object> response = new HashMap<String, Object>();
+      response.put("path", String.format("GET %s", Utils.getUrl(request)));
+      // Check that the userName is provided
+      if(userName != null) {
+        // Call the getAllSongFriendsLike method in playilstDriverImpl
+        DbQueryStatus status = profileDriver.getAllSongFriendsLike(userName); 
+        Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+      }
+      else {
+        Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+      }
+      // Send the response back
+      return response;
 	}
 
 
@@ -83,8 +116,17 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+		  // Check if friendUserName and userName are provided
+	      if(friendUserName != null && userName!=null) {
+	        // Call the unfollowFriend method in the playlist driver class
+	          DbQueryStatus status = profileDriver.unfollowFriend(userName, friendUserName);
+	          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+	        }
+	        else {
+	          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+	        }
+	      // send the response back
+	        return response;
 	}
 
 	@RequestMapping(value = "/likeSong/{userName}/{songId}", method = RequestMethod.PUT)
@@ -93,8 +135,17 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+		// Check that username and songId are provided
+		if(userName != null && songId != null) {
+		  DbQueryStatus status = playlistDriver.likeSong(userName, songId);
+		  // Set Utils to the values received back
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), (JSONObject) status.getData());
+		}
+		else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		// send the response back
+		return response;
 	}
 
 	@RequestMapping(value = "/unlikeSong/{userName}/{songId}", method = RequestMethod.PUT)
@@ -103,8 +154,17 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+		// Check that userName and songId are provided
+        if(userName != null && songId != null) {
+          DbQueryStatus status = playlistDriver.unlikeSong(userName, songId);
+          Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+        }
+        else {
+          // If path variables are not provided then return with an error code
+          Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+        }
+     // Send the response back
+        return response;
 	}
 
 	@RequestMapping(value = "/deleteAllSongsFromDb/{songId}", method = RequestMethod.PUT)
@@ -114,6 +174,14 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		
-		return null;
+		// Verify that the songId is provided
+		if(songId != null) {
+		  DbQueryStatus status = playlistDriver.deleteSongFromDb(songId);
+		  Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		}else {
+		  Utils.setResponseStatus(response, DbQueryExecResult.QUERY_ERROR_GENERIC, null);
+		}
+		// Send the response back
+		return response;
 	}
 }
