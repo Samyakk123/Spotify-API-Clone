@@ -1,8 +1,5 @@
 package com.csc301.songmicroservice;
 
-import java.util.Map;
-import org.bson.BasicBSONObject;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -20,8 +17,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+
 @Repository
 public class SongDalImpl implements SongDal {
+
 
   private final MongoTemplate db;
   private DbQueryStatus toReturn = null;
@@ -166,3 +165,4 @@ public class SongDalImpl implements SongDal {
 
   }
 }
+

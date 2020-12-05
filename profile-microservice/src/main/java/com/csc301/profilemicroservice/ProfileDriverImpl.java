@@ -13,13 +13,11 @@ import org.neo4j.driver.v1.StatementResult;
 
 import org.springframework.stereotype.Repository;
 import org.neo4j.driver.v1.Transaction;
-import org.neo4j.driver.v1.Value;
 
 @Repository
 public class ProfileDriverImpl implements ProfileDriver {
 
 	Driver driver = ProfileMicroserviceApplication.driver;
-	private DbQueryStatus toReturn = null; 
 
 	public static void InitProfileDb() {
 		String queryStr;
@@ -77,6 +75,7 @@ public class ProfileDriverImpl implements ProfileDriver {
 	    toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
         return toReturn;
 	  }
+
 	}
 
 	@Override

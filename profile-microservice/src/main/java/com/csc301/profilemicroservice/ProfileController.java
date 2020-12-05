@@ -68,6 +68,7 @@ public class ProfileController {
         }
         // Send the response back
         return response;
+
 	}
 
 	@RequestMapping(value = "/followFriend/{userName}/{friendUserName}", method = RequestMethod.PUT)
