@@ -127,7 +127,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      toInsert.put("song", song);
 	      toInsert.put("songId", songId);
 	             
-	      System.out.println("Something here");
 	      trans.run("MATCH (a:playlist {plName:$plName})\n" + "MERGE (b:song {songId:$songId, title:$song})\n" + "MERGE (a)-[r:includes]->(b)\n" + "RETURN r", toInsert);
 	      
 //	      trans.run("\n MATCH (a:profile {userName:$userName})-[r:created]->(b:playlist {plName:$plName})\n"
@@ -135,7 +134,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	      trans.success();
 	             
 	    }catch(Exception e) {
-	      System.out.println("error: " + e);
 	      toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	    }
 	      session.close();
@@ -199,7 +197,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 	          responseFromAddMs = call.execute();
 	          addServiceBody = responseFromAddMs.body().string();
 	        }catch(Exception e) {
-	          System.out.println(e);
 	          toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 	          return toReturn;
 	        }
@@ -208,7 +205,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		  session.close();
 		  
 		}catch(Exception e) {
-		  System.out.println(e);
 		  toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
 		  
 		}
