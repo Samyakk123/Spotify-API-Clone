@@ -166,21 +166,23 @@ public class ProfileDriverImpl implements ProfileDriver {
           
           toInsert.put("userName", userName);
           
+          //Checks if the user exists, if not an error message is given 
           Iterator<Record> checkUserExists = trans.run("MATCH (a:profile {userName:$userName}) \n RETURN a", toInsert); 
           if(!checkUserExists.hasNext()) { 
             toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
             return toReturn;
           }
+          //Gets all the friend names of the userName 
           StatementResult responseOne = trans.run("MATCH (a:profile {userName:$userName})-[r:follows]->(b:profile) \n RETURN b.userName", toInsert);
           List<Record> records = responseOne.list();      
           for(int i = 0; i < records.size(); i++) {
-            //assuming userName cannot be duplicate !!! 
             ArrayList<String> temp = new ArrayList<String>(); 
             Map<String, Object> toInsertTwo = new HashMap<String, Object>();
             Value friend = records.get(i).get("b.userName");
             String friendTemp = friend.toString().substring(1, friend.toString().length() - 1); 
             toInsertTwo.put("friend", friendTemp); 
             toInsertTwo.put("plName", friendTemp + "-favorites"); 
+            //Gets all the song titles that the friend likes 
             StatementResult responseTwo = trans.run("MATCH (a:profile {userName:$friend})-[r:created]->(b:playlist {plName:$plName})"
                 + "MATCH (b:playlist)-[d:includes]->(c:song) \n "
                 + "RETURN c.title", toInsertTwo);
@@ -189,6 +191,7 @@ public class ProfileDriverImpl implements ProfileDriver {
               Value songTitle = recordsTwo.get(j).get("c.title"); 
               temp.add(songTitle.toString().substring(1, songTitle.toString().length() - 1));
             }
+            //Adds the friend and the songs that he/she likes 
             data.put(friendTemp, temp);
             
           }
