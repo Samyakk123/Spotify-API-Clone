@@ -202,7 +202,6 @@ public class ProfileDriverImpl implements ProfileDriver {
         session.close();
         return toReturn;
       }catch(Exception e) {
-        System.out.println(e); 
         toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
         return toReturn;
       }
