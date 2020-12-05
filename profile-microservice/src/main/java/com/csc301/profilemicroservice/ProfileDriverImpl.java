@@ -166,7 +166,7 @@ public class ProfileDriverImpl implements ProfileDriver {
           
           toInsert.put("userName", userName);
           
-          Iterator<Record> checkUserExists = trans.run("MATCH (a:profile {userName:$userName}) /n RETURN a", toInsert); 
+          Iterator<Record> checkUserExists = trans.run("MATCH (a:profile {userName:$userName}) \n RETURN a", toInsert); 
           if(!checkUserExists.hasNext()) { 
             toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
             return toReturn;
@@ -198,6 +198,7 @@ public class ProfileDriverImpl implements ProfileDriver {
         session.close();
         return toReturn;
       }catch(Exception e) {
+        System.out.println(e); 
         toReturn.setdbQueryExecResult(DbQueryExecResult.QUERY_ERROR_GENERIC);
         return toReturn;
       }
