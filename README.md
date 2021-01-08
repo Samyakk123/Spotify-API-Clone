@@ -1,4 +1,4 @@
-# Spotify-API 
+# Spotify-API-Clone
 
 Creators: Samyak Mehta, and Divyam Patel
 
